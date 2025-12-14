@@ -19,6 +19,7 @@ io.on("connection", (socket) => {
       });
     console.log("onlineUser", onlineUsers);
     io.emit("getOnlineUsers", onlineUsers);
+    console.log("🚀 ~ onlineUsers:", onlineUsers);
   });
 
   //   add message
@@ -26,10 +27,19 @@ io.on("connection", (socket) => {
     const user = onlineUsers.find(
       (user) => user.userId === message.recipientId
     );
+
     if (user) {
       io.to(user.socketId).emit("getMessage", message);
+
+      io.to(user.socketId).emit("getNotification", {
+        senderId: message.senderId,
+        chatId: message.chatId, 
+        isRead: false,
+        date: new Date(),
+      });
     }
   });
+
   socket.on("disconnect", () => {
     onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
     io.emit("getOnlineUsers", onlineUsers);
